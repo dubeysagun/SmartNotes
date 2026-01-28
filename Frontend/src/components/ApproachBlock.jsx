@@ -1,18 +1,22 @@
 function ApproachBlock({ label, value, onChange, onGenerate }) {
   return (
-    <div className="card mb-4">
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-        <h3>{label}</h3>
+    <div className="mb-4" style={{ border: "2px solid #f0f0f0", borderRadius: "8px", padding: "16px", backgroundColor: "#fafafa" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", gap: "12px" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "#333", margin: 0 }}>{label}</h3>
 
-        <div>
-          <button className="btn-gray" type="button">
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button 
+            className="btn-gray" 
+            type="button"
+            style={{ padding: "8px 12px", fontSize: "0.9rem", width: "auto" }}
+          >
             Enter
           </button>
           <button
             className="btn-blue"
             type="button"
             onClick={onGenerate}
-            style={{ marginLeft: "8px" }}
+            style={{ padding: "8px 12px", fontSize: "0.9rem", width: "auto", minWidth: "100px" }}
           >
             Generate
           </button>
@@ -24,6 +28,8 @@ function ApproachBlock({ label, value, onChange, onGenerate }) {
         placeholder={`Enter ${label}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        style={{ marginBottom: 0 }}
+        rows="5"
       />
     </div>
   );

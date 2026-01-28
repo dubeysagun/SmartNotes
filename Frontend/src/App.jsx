@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import AddNote from "./pages/AddNote";
 import ViewNotes from "./pages/ViewNotes";
+import "./App.css";
 
 function App() {
   return (

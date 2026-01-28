@@ -4,19 +4,37 @@ function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="container" style={{ textAlign: "center" }}>
-      <div className="card" style={{ maxWidth: "400px", margin: "auto" }}>
-        <h1 className="section-title mb-4">DSA Notes</h1>
+    <div className="container">
+      <div className="card">
+        <h1 className="section-title">
+          📚 Smart Notes
+        </h1>
+        
+        <p className="home-subtitle">
+          Master DSA problems with organized, structured notes
+        </p>
 
-        <button className="btn-blue mb-4" onClick={() => navigate("/add-note")}>
-          Add Note
-        </button>
+        <div className="button-container">
+          <button 
+            className="btn-blue" 
+            onClick={() => navigate("/add-note")}
+          >
+            ✏️ Add New Note
+          </button>
 
-        <br />
+          <button 
+            className="btn-gray" 
+            onClick={() => navigate("/view-notes")}
+          >
+            👁️ View All Notes
+          </button>
+        </div>
 
-        <button className="btn-gray" onClick={() => navigate("/view-notes")}>
-          View Notes
-        </button>
+        <div className="home-info-box">
+          <p className="home-info-text">
+            <i>Perfect for preparing for interviews and mastering data structures</i>
+          </p>
+        </div>
       </div>
     </div>
   );
