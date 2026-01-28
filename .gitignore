@@ -1,0 +1,14 @@
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+
+# Backend (future)
+Backend/node_modules/
+Backend/dist/
+
+# Env files
+.env
+.env.local
+
+# OS files
+.DS_Store
