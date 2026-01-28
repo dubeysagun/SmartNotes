@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import apiClient from "../services/api";
 import Section from "../components/Section";
 import ApproachBlock from "../components/ApproachBlock";
 import CodeBlock from "../components/CodeBlock";
 
 function AddNote() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   
   const [topic, setTopic] = useState("");
   const [title, setTitle] = useState("");
@@ -39,26 +44,41 @@ function AddNote() {
     ]);
   };
 
-  const handleSaveNote = () => {
-    const noteData = {
-      topic,
-      title,
-      link,
-      statement,
-      approach,
-      summary,
-      complexity,
-      codeBlocks,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // Save to localStorage
-    const allNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    allNotes.push(noteData);
-    localStorage.setItem("notes", JSON.stringify(allNotes));
-    
-    // Redirect to view notes
-    navigate("/view-notes");
+  const handleSaveNote = async () => {
+    // Validate required fields
+    if (!topic.trim() || !title.trim()) {
+      setError("Topic and Title are required!");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const noteData = {
+        topic,
+        title,
+        link,
+        statement,
+        approach,
+        summary,
+        complexity,
+        codeBlocks,
+      };
+
+      // Save to backend
+      const response = await apiClient.post("/api/notes", noteData);
+      
+      if (response.data.success) {
+        // Redirect to view notes
+        navigate("/view-notes");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to save note. Please try again.");
+      console.error("Error saving note:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,13 +91,27 @@ function AddNote() {
           </button>
         </div>
 
+        {error && (
+          <div style={{
+            backgroundColor: "#fee2e2",
+            color: "#dc2626",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+            border: "1px solid #fecaca"
+          }}>
+            {error}
+          </div>
+        )}
+
         {/* Topic / Tag Section */}
         <Section title="1. Topic / Tag">
           <input 
             className="input" 
             placeholder="e.g., Array, DP, Graph, Sliding Window" 
             value={topic} 
-            onChange={(e) => setTopic(e.target.value)} 
+            onChange={(e) => setTopic(e.target.value)}
+            disabled={loading}
           />
         </Section>
 
@@ -87,19 +121,22 @@ function AddNote() {
             className="input input-mb" 
             placeholder="Problem Title" 
             value={title} 
-            onChange={(e) => setTitle(e.target.value)} 
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={loading}
           />
           <input 
             className="input input-mb" 
             placeholder="Problem Link (LeetCode / Codeforces / GFG)" 
             value={link} 
-            onChange={(e) => setLink(e.target.value)} 
+            onChange={(e) => setLink(e.target.value)}
+            disabled={loading}
           />
           <textarea 
             className="textarea" 
             placeholder="Problem Statement (Optional)" 
             value={statement} 
             onChange={(e) => setStatement(e.target.value)}
+            disabled={loading}
             rows="4"
           />
         </Section>
@@ -141,7 +178,7 @@ function AddNote() {
               onRemove={() => setCodeBlocks(codeBlocks.filter((_, idx) => idx !== i))}
             />
           ))}
-          <button className="btn-blue btn-add-block" onClick={addCodeBlock}>
+          <button className="btn-blue btn-add-block" onClick={addCodeBlock} disabled={loading}>
             + Add Code Block
           </button>
         </Section>
@@ -191,10 +228,18 @@ function AddNote() {
         </Section>
 
         <div className="action-buttons">
-          <button className="btn-blue button-flex" onClick={handleSaveNote}>
-            Save Note
+          <button 
+            className="btn-blue button-flex" 
+            onClick={handleSaveNote}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save Note"}
           </button>
-          <button className="btn-gray button-flex" onClick={() => navigate("/")}>
+          <button 
+            className="btn-gray button-flex" 
+            onClick={() => navigate("/")}
+            disabled={loading}
+          >
             Cancel
           </button>
         </div>

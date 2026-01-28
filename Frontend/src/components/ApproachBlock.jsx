@@ -5,13 +5,6 @@ function ApproachBlock({ label, value, onChange, onGenerate }) {
         <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "#333", margin: 0 }}>{label}</h3>
 
         <div style={{ display: "flex", gap: "8px" }}>
-          <button 
-            className="btn-gray" 
-            type="button"
-            style={{ padding: "8px 12px", fontSize: "0.9rem", width: "auto" }}
-          >
-            Enter
-          </button>
           <button
             className="btn-blue"
             type="button"

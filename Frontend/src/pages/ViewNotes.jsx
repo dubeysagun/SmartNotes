@@ -1,26 +1,65 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import apiClient from "../services/api";
 
 function ViewNotes() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // Fetch notes from backend
   useEffect(() => {
-    // Load notes from localStorage
-    const allNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    setNotes(allNotes);
+    fetchNotes();
   }, []);
 
-  const deleteNote = (index) => {
-    const updatedNotes = notes.filter((_, i) => i !== index);
-    setNotes(updatedNotes);
-    localStorage.setItem("notes", JSON.stringify(updatedNotes));
-    setSelectedNote(null);
+  const fetchNotes = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get("/api/notes");
+      if (response.data.success) {
+        setNotes(response.data.notes);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load notes");
+      console.error("Error loading notes:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const deleteNote = async (noteId) => {
+    if (!window.confirm("Are you sure you want to delete this note?")) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.delete(`/api/notes/${noteId}`);
+      if (response.data.success) {
+        setNotes(notes.filter(note => note._id !== noteId));
+        setSelectedNote(null);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete note");
+      console.error("Error deleting note:", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="card">
+          <p style={{ textAlign: "center", padding: "40px" }}>Loading notes...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedNote !== null) {
-    const note = notes[selectedNote];
+    const note = selectedNote;
     return (
       <div className="container">
         <div className="card">
@@ -30,6 +69,19 @@ function ViewNotes() {
               ← Back
             </button>
           </div>
+
+          {error && (
+            <div style={{
+              backgroundColor: "#fee2e2",
+              color: "#dc2626",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              border: "1px solid #fecaca"
+            }}>
+              {error}
+            </div>
+          )}
 
           {/* Topic */}
           {note.topic && (
@@ -152,7 +204,10 @@ function ViewNotes() {
 
           {/* Actions */}
           <div className="notes-list">
-            <button className="btn-gray button-flex" onClick={() => deleteNote(selectedNote)}>
+            <button 
+              className="btn-gray button-flex" 
+              onClick={() => deleteNote(note._id)}
+            >
               Delete Note
             </button>
             <button className="btn-blue button-flex" onClick={() => navigate("/add-note")}>
@@ -174,6 +229,19 @@ function ViewNotes() {
           </button>
         </div>
 
+        {error && (
+          <div style={{
+            backgroundColor: "#fee2e2",
+            color: "#dc2626",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+            border: "1px solid #fecaca"
+          }}>
+            {error}
+          </div>
+        )}
+
         {notes.length === 0 ? (
           <div className="empty-state">
             <p className="empty-state-text">
@@ -189,10 +257,10 @@ function ViewNotes() {
               Total Notes: <strong>{notes.length}</strong>
             </p>
             <div className="notes-list-container">
-              {notes.map((note, index) => (
+              {notes.map((note) => (
                 <div
-                  key={index}
-                  onClick={() => setSelectedNote(index)}
+                  key={note._id}
+                  onClick={() => setSelectedNote(note)}
                   className="note-card"
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = "#667eea";
